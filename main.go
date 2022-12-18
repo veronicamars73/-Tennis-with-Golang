@@ -38,7 +38,6 @@ func receiver(c chan int) {
 			println("Ace point!")
 			close(c)
 		} else {
-			println("Point continues")
 			c <- receiver_ball
 		}
 	}
@@ -47,9 +46,9 @@ func receiver(c chan int) {
 func first(c chan int) {
 	source := rand.NewSource(time.Now().UnixNano())
 	r := rand.New(source)
-	bola_server := <-c
-	println(bola_server)
-	if bola_server == 0 {
+	bola_receiver := <-c
+	println(bola_receiver)
+	if bola_receiver == 0 {
 		println("Ending point.")
 		close(c)
 	} else {
