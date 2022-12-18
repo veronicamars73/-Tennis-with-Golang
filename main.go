@@ -23,7 +23,7 @@ func server(c chan int) {
 	c <- serve_result
 }
 
-func reciever(c chan int) {
+func receiver(c chan int) {
 	source := rand.NewSource(time.Now().UnixNano())
 	r := rand.New(source)
 	bola_server := <-c
@@ -32,15 +32,56 @@ func reciever(c chan int) {
 		println("Ending point.")
 		close(c)
 	} else {
-		reciever_ball := r.Intn(2)
-		println("Recieve", reciever_ball)
-		if reciever_ball == 0 {
+		receiver_ball := r.Intn(2)
+		println("Receiver", receiver_ball)
+		if receiver_ball == 0 {
 			println("Ace point!")
 			close(c)
 		} else {
 			println("Point continues")
-			// remover 43 quando funcões de jogo estiverem funcionando
-			close(c)
+			c <- receiver_ball
+		}
+	}
+}
+
+func first(c chan int) {
+	source := rand.NewSource(time.Now().UnixNano())
+	r := rand.New(source)
+	bola_server := <-c
+	println(bola_server)
+	if bola_server == 0 {
+		println("Ending point.")
+		close(c)
+	} else {
+		server_ball := r.Intn(2)
+		println("Server", server_ball)
+		if server_ball == 0 {
+			println("Server missed")
+			c <- server_ball
+		} else {
+			println("Server returns ball. Point continues")
+			c <- server_ball
+		}
+	}
+}
+
+func second(c chan int) {
+	source := rand.NewSource(time.Now().UnixNano())
+	r := rand.New(source)
+	bola_server := <-c
+	println(bola_server)
+	if bola_server == 0 {
+		println("Ending point.")
+		close(c)
+	} else {
+		receiver_ball := r.Intn(2)
+		println("Receiver", receiver_ball)
+		if receiver_ball == 0 {
+			println("Receiver missed")
+			c <- receiver_ball
+		} else {
+			println("Receiver returns ball. Point continues")
+			c <- receiver_ball
 		}
 	}
 }
@@ -51,13 +92,19 @@ func main() {
 
 	go server(quadra)
 	time.Sleep(1 * time.Second)
-	go reciever(quadra)
+	go receiver(quadra)
 	time.Sleep(1 * time.Second)
 	_, status := <-quadra
 
 	if status {
 		fmt.Println("Point continues!")
-		close(quadra)
+		for status {
+			go first(quadra)
+			time.Sleep(1 * time.Second)
+			go second(quadra)
+			time.Sleep(1 * time.Second)
+			_, status = <-quadra
+		}
 	} else {
 		fmt.Println("Point ends!")
 	}
