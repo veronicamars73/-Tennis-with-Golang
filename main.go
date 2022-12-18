@@ -39,6 +39,8 @@ func reciever(c chan int) {
 			close(c)
 		} else {
 			println("Point continues")
+			// remover 43 quando funcões de jogo estiverem funcionando
+			close(c)
 		}
 	}
 }
