@@ -64,7 +64,6 @@ func receiver(c chan int, is_serve bool, winner chan int) {
 }
 
 func score_calc(points int) {
-	println(points)
 	if points == 0 {
 		println("0")
 	} else {
